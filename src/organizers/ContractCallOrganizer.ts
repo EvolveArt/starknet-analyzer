@@ -115,7 +115,7 @@ export class ContractCallOrganizer {
 		let functions: OrganizedFunctionAbi = {};
 		let events: OrganizedEventAbi = {};
 		let structs: OrganizedStructAbi = {};
-		for (const item of abi) {
+		for (const item of _abi) {
 			if (
 				item.type === "function" ||
 				item.type === "l1_handler" ||

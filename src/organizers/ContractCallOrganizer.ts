@@ -71,7 +71,11 @@ export class ContractCallOrganizer {
 					functions: implementationFunctions,
 					structs: implementationStructs,
 					events: implementationEvents,
-				} = await this._organizeContractAbi(implementationAddress, provider);
+				} = await this._organizeContractAbi(
+					implementationAddress,
+					provider,
+					true
+				);
 
 				functions = { ...functions, ...implementationFunctions };
 				structs = { ...structs, ...implementationStructs };
@@ -86,12 +90,23 @@ export class ContractCallOrganizer {
 
 	static async _organizeContractAbi(
 		contractAddress: string,
-		provider: StandardProvider<Provider>
+		provider: StandardProvider<Provider>,
+		isClassHash = false
 	) {
-		const { abi } = (await provider.getCode(
-			contractAddress
-		)) as GetCodeResponse;
-		if (Object.keys(abi).length === 0) {
+		let _abi;
+		if (!isClassHash) {
+			const { abi } = (await provider.getCode(
+				contractAddress
+			)) as GetCodeResponse;
+			_abi = abi;
+		} else {
+			const response = await fetch(
+				`https://alpha4.starknet.io/feeder_gateway/get_class_by_hash?classHash=${contractAddress}`
+			);
+			const json = await response.json();
+			_abi = json.abi;
+		}
+		if (Object.keys(_abi).length === 0) {
 			throw new Error(
 				`ContractCallOrganizer::_organizeContractAbi - Couldn't fetch abi for address ${contractAddress}`
 			);
